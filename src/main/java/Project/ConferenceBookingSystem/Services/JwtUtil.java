@@ -1,5 +1,6 @@
 package Project.ConferenceBookingSystem.Services;
 
+import Project.ConferenceBookingSystem.Exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -30,11 +31,17 @@ public class JwtUtil {
     }
 
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            throw new JwtAuthenticationException("JWT token has expired");
+        } catch (JwtException e) {
+            throw new JwtAuthenticationException("Invalid JWT token");
+        }
     }
 
     public String extractUsername(String token) {

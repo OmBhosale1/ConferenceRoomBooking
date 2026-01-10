@@ -1,6 +1,7 @@
 package Project.ConferenceBookingSystem.filters;
 
 
+import Project.ConferenceBookingSystem.Exceptions.JwtAuthenticationException;
 import Project.ConferenceBookingSystem.Services.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -33,34 +34,42 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String authHeader = request.getHeader("Authorization");
 
+        try {
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                String username = jwtUtil.extractUsername(token);
+
+                if (username != null &&
+                        SecurityContextHolder.getContext().getAuthentication() == null) {
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    username,
+                                    null,
+                                    Collections.emptyList()
+                            );
+
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(authentication);
+                }
+            }
+
             filterChain.doFilter(request, response);
-            return;
+
+        } catch (JwtAuthenticationException ex) {
+
+            // 🔥 IMPORTANT: stop filter chain
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+            {
+              "error": "Unauthorized",
+              "message": "%s"
+            }
+        """.formatted(ex.getMessage()));
         }
-
-        String token = authHeader.substring(7);
-        String username = jwtUtil.extractUsername(token);
-
-        if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null &&
-                !jwtUtil.isTokenExpired(token)) {
-
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            username,
-                            null,
-                            Collections.emptyList()
-                    );
-
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
-
-        filterChain.doFilter(request, response);
     }
+
 }
 

@@ -30,7 +30,7 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@RequestBody LoginRequest request) {
 
-        // 1️⃣ Authenticate username + password
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
@@ -38,14 +38,22 @@ public class AuthController {
                 )
         );
 
-        // 2️⃣ Fetch user from DB (TRUST DB, NOT CLIENT)
+
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 3️⃣ Generate JWT using DB role
+
         return jwtUtil.generateToken(
                 user.getUsername(),
                 user.getRole()
         );
     }
+
+    @PostMapping("/logout")
+    public String logout() {
+        // JWT is stateless → nothing to invalidate server-side
+        return "Logged out successfully";
+    }
+
+
 }

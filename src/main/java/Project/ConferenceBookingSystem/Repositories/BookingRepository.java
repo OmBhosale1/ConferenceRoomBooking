@@ -3,6 +3,7 @@ package Project.ConferenceBookingSystem.Repositories;
 import Project.ConferenceBookingSystem.Models.Booking;
 import Project.ConferenceBookingSystem.Models.Room;
 import Project.ConferenceBookingSystem.Models.BookingStatus;
+import Project.ConferenceBookingSystem.Models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDateTime;
@@ -17,5 +18,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LocalDateTime endTime,
             LocalDateTime startTime
     );
+
+    List<Booking> findByUserAndStatus(User user, BookingStatus status);
 
 }

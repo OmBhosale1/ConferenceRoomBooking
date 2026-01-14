@@ -71,4 +71,13 @@ public class BookingService {
 
         return saved;
     }
+
+
+    public List<Booking> getMyBookedRooms(String username) {
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return bookingRepository.findByUserAndStatus(user, BookingStatus.BOOKED);
+    }
 }

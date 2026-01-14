@@ -6,6 +6,8 @@ import Project.ConferenceBookingSystem.Services.BookingService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
@@ -22,5 +24,11 @@ public class BookingController {
 
         String username = authentication.getName();
         return bookingService.bookRoom(username, request);
+    }
+
+    @GetMapping("/mybookedrooms")
+    public List<Booking> myBookedRooms(Authentication authentication) {
+        String username = authentication.getName();
+        return bookingService.getMyBookedRooms(username);
     }
 }

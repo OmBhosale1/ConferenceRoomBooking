@@ -3,5 +3,6 @@ package Project.ConferenceBookingSystem.Models;
 public enum RoomStatus {
     AVAILABLE,
     BOOKED,
-    MAINTENANCE
+    MAINTENANCE,
+    EXPIRED
 }

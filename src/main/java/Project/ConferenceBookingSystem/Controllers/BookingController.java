@@ -26,9 +26,9 @@ public class BookingController {
         return bookingService.bookRoom(username, request);
     }
 
-    @GetMapping("/mybookedrooms")
-    public List<Booking> myBookedRooms(Authentication authentication) {
-        String username = authentication.getName();
-        return bookingService.getMyBookedRooms(username);
+    @GetMapping("/available")
+    public List<Booking> myActive(Authentication auth) {
+        return bookingService.getMyActiveBookings(auth.getName());
     }
+
 }

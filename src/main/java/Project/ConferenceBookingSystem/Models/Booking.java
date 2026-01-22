@@ -40,7 +40,7 @@ public class Booking {
     private LocalDateTime endTime;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private BookingStatus status = BookingStatus.BOOKED;
 
     @Column(nullable = false)

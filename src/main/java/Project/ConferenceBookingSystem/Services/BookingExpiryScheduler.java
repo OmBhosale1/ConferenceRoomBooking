@@ -33,14 +33,13 @@ public class BookingExpiryScheduler {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // all bookings that ended but still marked BOOKED
         List<Booking> expired = bookingRepository
                 .findByStatusAndEndTimeBefore(BookingStatus.BOOKED, now);
 
         if (expired.isEmpty()) return;
 
         for (Booking b : expired) {
-            b.setStatus(BookingStatus.EXPIRED); // add EXPIRED in enum
+            b.setStatus(BookingStatus.EXPIRED);
             bookingRepository.save(b);
 
             Room room = b.getRoom();
@@ -48,7 +47,7 @@ public class BookingExpiryScheduler {
             roomRepository.save(room);
         }
 
-        // ✅ invalidate cache so /rooms/available refreshes from DB
+
         redisService.delete(ROOMS_AVAILABLE_KEY);
     }
 }

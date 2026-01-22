@@ -31,4 +31,13 @@ public class BookingController {
         return bookingService.getMyActiveBookings(auth.getName());
     }
 
+    @PutMapping("/{bookingId}/cancel")
+    public String cancel(Authentication authentication,
+                         @PathVariable Long bookingId) {
+
+        bookingService.cancelBooking(authentication.getName(), bookingId);
+        return "Booking cancelled successfully";
+    }
+
+
 }

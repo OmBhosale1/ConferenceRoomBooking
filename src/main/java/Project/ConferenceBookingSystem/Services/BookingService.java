@@ -81,4 +81,41 @@ public class BookingService {
                 user, BookingStatus.BOOKED, LocalDateTime.now()
         );
     }
+
+    public void cancelBooking(String username, Long bookingId) {
+
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+
+        if (!booking.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("You cannot cancel someone else's booking");
+        }
+
+        if (booking.getStatus() != BookingStatus.BOOKED) {
+            throw new RuntimeException("Booking is not active");
+        }
+
+        if (booking.getEndTime().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Booking already ended");
+        }
+
+        booking.setStatus(BookingStatus.CANCELLED);
+        bookingRepository.save(booking);
+
+        Room room = booking.getRoom();
+
+        boolean hasOtherActive = !bookingRepository
+                .findByRoomAndStatusAndEndTimeAfter(room, BookingStatus.BOOKED, LocalDateTime.now())
+                .isEmpty();
+
+        if (!hasOtherActive) {
+            room.setStatus(RoomStatus.AVAILABLE);
+            roomRepository.save(room);
+        }
+
+        redisService.delete("rooms:available");
+    }
+
+
 }

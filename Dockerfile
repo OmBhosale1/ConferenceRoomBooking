@@ -1,20 +1,26 @@
-# ---------- Build stage ----------
-FROM eclipse-temurin:17-jdk AS builder
+# Dockerfile for Spring Boot with Java 21
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy pom.xml first (for dependency caching)
+# Copy Maven files
 COPY pom.xml .
-RUN apt-get update && apt-get install -y maven
-RUN mvn dependency:go-offline
+RUN mvn dependency:go-offline -B
 
 # Copy source code
-COPY src src
+COPY src ./src
+
+# Build the application
 RUN mvn clean package -DskipTests
 
-# ---------- Run stage ----------
-FROM eclipse-temurin:17-jre
+# Create runtime image
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
 
+# Copy the built jar
+COPY --from=build /app/target/*.jar app.jar
+
+# Expose port
 EXPOSE 8080
+
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
